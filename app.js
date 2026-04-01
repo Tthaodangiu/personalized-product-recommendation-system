@@ -10,7 +10,6 @@ const DEFAULT_CONFIG = {
   },
   bannerSlides: []
 };
-
 const CATEGORY_ORDER = [
   'all',
   'Thực phẩm',
@@ -740,7 +739,8 @@ function showProductDetail(product) {
     </div>
   `;
   dom.productDetailSection.classList.remove('hidden');
-  dom.productDetailSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const container = dom.productGrid.parentElement;
+  container.insertBefore(dom.productDetailSection, dom.productGrid);
 }
 
 function handleProductAction(event) {
@@ -934,13 +934,6 @@ function setActiveSlide(index, syncSpotlight) {
   const slides = buildSlides();
   state.activeSlide = ((index % slides.length) + slides.length) % slides.length;
   updateCarouselPosition();
-  if (syncSpotlight) {
-    const keys = ['for-you', 'top', 'segment', 'rules'];
-    state.activeSpotlight = keys[state.activeSlide] || 'for-you';
-    dom.spotlightButtons.forEach(button => button.classList.toggle('active', button.dataset.spotlight === state.activeSpotlight));
-    renderHeroText();
-    renderProductGrid();
-  }
   startCarouselTimer();
 }
 
