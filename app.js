@@ -137,7 +137,7 @@ function bindStaticEvents() {
   dom.promoDots.addEventListener('click', event => {
     const button = event.target.closest('[data-slide-index]');
     if (!button) return;
-    setActiveSlide(Number(button.dataset.slideIndex), true);
+    setActiveSlide(Number(button.dataset.slideIndex), false);
   });
   dom.closeRecommendationModal.addEventListener('click', closeModal);
   document.querySelector('#recommendationModal .modal-backdrop').addEventListener('click', closeModal);
