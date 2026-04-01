@@ -124,9 +124,10 @@ function bindStaticEvents() {
   dom.spotlightButtons.forEach(button => {
     button.addEventListener('click', () => {
       state.activeSpotlight = button.dataset.spotlight;
-      dom.spotlightButtons.forEach(btn => btn.classList.toggle('active', btn === button));
-      state.activeSlide = dom.spotlightButtons.findIndex(btn => btn.dataset.spotlight === state.activeSpotlight);
-      updateCarouselPosition();
+      dom.spotlightButtons.forEach(btn =>
+        btn.classList.toggle('active', btn === button)
+      );
+  
       renderHeroText();
       renderProductGrid();
     });
@@ -923,23 +924,27 @@ function buildSlides() {
   ];
 }
 
-function changeSlide(delta) {
+function function setActiveSlide(index, syncSpotlight) { {
   const slides = buildSlides();
   const nextIndex = (state.activeSlide + delta + slides.length) % slides.length;
-  setActiveSlide(nextIndex, true);
+  setActiveSlide(nextIndex, false);
 }
 
-function setActiveSlide(index, syncSpotlight) {
+function setActiveSlide(index, syncSpotlight = false) {
   const slides = buildSlides();
   state.activeSlide = ((index % slides.length) + slides.length) % slides.length;
   updateCarouselPosition();
+
   if (syncSpotlight) {
     const keys = ['for-you', 'top', 'segment', 'rules'];
     state.activeSpotlight = keys[state.activeSlide] || 'for-you';
-    dom.spotlightButtons.forEach(button => button.classList.toggle('active', button.dataset.spotlight === state.activeSpotlight));
+    dom.spotlightButtons.forEach(button =>
+      button.classList.toggle('active', button.dataset.spotlight === state.activeSpotlight)
+    );
     renderHeroText();
     renderProductGrid();
   }
+
   startCarouselTimer();
 }
 
