@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Demo gợi ý sản phẩm theo luật kết hợp</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script>
+    window.STORE_FILE_CONFIG = {
+      transactionsCsv: './data_2024.csv',
+      rfmCsv: './RFM_moi.csv',
+      imagesJson: './images.json',
+      ruleFiles: {
+        'About to Sleep': './fixed_file_About_to_Sleep.xlsx',
+        'Champion': './fixed_file_Champion_Rules copy.xlsx',
+        'Hibernating': './fixed_file_Hibernating_Rules.xlsx',
+        'Loyal': './fixed_file_Loyal_Rules.xlsx'
+      },
+      bannerSlides: [
+        {
+          title: 'Ưu tiên theo lịch sử mua của bạn',
+          subtitle: 'Tập trung vào những nhóm sản phẩm mà khách hàng đã quan tâm, kết hợp thêm sản phẩm tương đồng và sản phẩm mua kèm.',
+          tag: 'Dành cho bạn',
+          background: 'https://thuongtruong-fileserver.nvcms.net/IMAGES/2023/05/29/20230529070704-51thit-heo-sach.jpg',
+          align: 'left'
+        },
+        {
+          title: 'Top bán chạy từ dữ liệu 2024',
+          subtitle: 'Sắp xếp theo tần suất xuất hiện trong data_2024.csv để ưu tiên những sản phẩm phổ biến nhất toàn hệ thống.',
+          tag: 'Top bán chạy',
+          background: 'https://brgshopping.vn/web/image/115030/web1.jpg?access_token=cebda6b6-2e99-46bd-af17-20384f185977',
+          align: 'left'
+        },
+        {
+          title: 'Gợi ý đúng theo phân khúc RFM',
+          subtitle: 'Mỗi phân khúc Champion, Loyal, Hibernating và About to Sleep sẽ dùng bộ luật kết hợp riêng để đề xuất.',
+          tag: 'RFM segment',
+          background: 'https://tongkhogiake.com/uploads/mo-cua-hang-gia-dung-can-bao-nhieu-von.jpg',
+          align: 'left'
+        },
+        {
+          title: 'Luật kết hợp mạnh để mua ngay',
+          subtitle: 'Bấm “Mua ngay” ở từng sản phẩm để mở popup đề xuất theo confidence, support và lift phù hợp với phân khúc hiện tại.',
+          tag: 'Association rules',
+          background: 'https://puriocafe.com/images/stories/blog/250212-hinh-anh-ly-cafe-tinh-yeu-Puriocafe-4.jpg',
+          align: 'left'
+        }
+      ]
+    };
+  </script>
+</head>
+<body>
+  <div id="app">
+    <section id="loadingView" class="view loading-view">
+      <div class="loading-card">
+        <div class="brand-logo">Target &amp; Store</div>
+        <h1>Đang nạp dữ liệu cửa hàng</h1>
+        <p id="loadingText">Đang đọc data_2024.csv, RFM_moi.csv, images.json và 4 file luật kết hợp...</p>
+      </div>
+    </section>
+
+    <section id="loginView" class="view login-view hidden">
+      <header class="login-header">
+        <div class="brand-block">
+          <div class="brand-logo">Target &amp; store</div>
+          <div class="brand-divider"></div>
+          <div class="brand-title">Đăng nhập</div>
+        </div>
+      </header>
+
+      <div class="login-shell">
+        <div id="loginScene" class="login-scene">
+          <div class="scene-badge">Gợi ý sản phẩm theo luật kết hợp</div>
+          <div class="scene-title">Hệ thống đề xuất sản phẩm</div>
+          <p class="scene-copy">
+            Đăng nhập bằng <strong>tên khách hàng</strong> để xem phân khúc, lịch sử mua và nhận đề xuất sản phẩm phù hợp.
+          </p>
+
+          <div class="scene-promo-card scene-promo-main">
+            <span class="promo-chip">Pastel Green</span>
+            <h2>Đề xuất cá nhân hoá cho từng khách hàng</h2>
+            <p>Kết hợp lịch sử mua, nhóm sản phẩm và luật kết hợp theo phân khúc.</p>
+          </div>
+
+          <div class="scene-grid">
+            <div class="scene-mini-card">
+              <div class="mini-card-title">RFM Segment</div>
+              <div class="mini-card-value">Champion / Loyal / Hibernating / About to Sleep</div>
+            </div>
+            <div class="scene-mini-card">
+              <div class="mini-card-title">Association Rules</div>
+              <div class="mini-card-value">Confidence · Support · Lift</div>
+            </div>
+            <div class="scene-mini-card scene-mini-wide">
+              <div class="mini-card-title">UI cửa hàng</div>
+              <div class="mini-card-value">Danh sách sản phẩm · Carousel · Giỏ hàng · Mua ngay</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="login-card">
+          <div class="login-card-inner">
+            <div class="eyebrow">Demo cửa hàng</div>
+            <h1>Vui lòng nhập tên khách hàng</h1>
+            <p class="login-subtitle">
+              Không cần mật khẩu. Hệ thống sẽ dò theo <strong>Customer_Name</strong>, sau đó hiển thị
+              phân khúc và lịch sử mua của khách hàng đó.
+            </p>
+
+            <label class="field-label" for="customerNameInput">Tên khách hàng</label>
+            <input
+              id="customerNameInput"
+              type="text"
+              autocomplete="off"
+              placeholder="Ví dụ: Lori Hill"
+            />
+
+            <button id="loginBtn" class="primary-btn">Đăng nhập</button>
+
+            <div id="loginMessage" class="login-message" aria-live="polite"></div>
+
+            <div class="sample-block">
+              <div class="sample-title">Tên khách hàng mẫu</div>
+              <div id="sampleNames" class="sample-chips"></div>
+            </div>
+
+            <details class="config-panel">
+              <summary>Đổi đường dẫn file dữ liệu</summary>
+              <div class="config-grid">
+                <label><span>data_2024.csv</span><input id="cfgTransactionsCsv" type="text" /></label>
+                <label><span>RFM_moi.csv</span><input id="cfgRfmCsv" type="text" /></label>
+                <label><span>images.json</span><input id="cfgImagesJson" type="text" /></label>
+                <label><span>About to Sleep</span><input id="cfgRuleAbout" type="text" /></label>
+                <label><span>Champion</span><input id="cfgRuleChampion" type="text" /></label>
+                <label><span>Hibernating</span><input id="cfgRuleHibernating" type="text" /></label>
+                <label><span>Loyal</span><input id="cfgRuleLoyal" type="text" /></label>
+              </div>
+              <div class="config-actions">
+                <button id="applyConfigBtn" class="secondary-btn" type="button">Nạp lại theo đường dẫn mới</button>
+              </div>
+            </details>
+
+            <label class="terms-line">
+              <input type="checkbox" checked />
+              <span>Tôi hiểu đây là bản demo đăng nhập theo tên khách hàng, không dùng password.</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="storeView" class="view store-view hidden">
+      <div class="utility-bar">
+        <div class="utility-left">Hệ thống demo gợi ý sản phẩm theo luật kết hợp &amp; phân khúc khách hàng</div>
+        <div id="utilityRight" class="utility-right"></div>
+      </div>
+
+      <header class="store-header">
+        <div class="store-brand">Target &amp; store</div>
+
+        <div class="store-search">
+          <input id="productSearchInput" type="text" placeholder="Tìm sản phẩm hôm nay..." />
+          <button id="clearSearchBtn" class="search-action" title="Xoá tìm kiếm">⌕</button>
+        </div>
+
+        <div class="store-actions">
+          <button id="cartButton" class="action-card cart-card-button" type="button">
+            <span class="icon-wrap">🛒</span>
+            <span class="action-text">Giỏ hàng</span>
+            <span id="cartCount" class="count-badge">0</span>
+          </button>
+
+          <div class="action-card account-card-button">
+            <span class="icon-wrap">👤</span>
+            <div class="account-lines">
+              <span class="account-name" id="headerCustomerName">Khách hàng</span>
+              <span class="account-segment" id="headerCustomerSegment">Phân khúc</span>
+            </div>
+          </div>
+
+          <button id="logoutBtn" class="ghost-btn" type="button">Đăng xuất</button>
+        </div>
+      </header>
+
+      <div class="spotlight-row" id="spotlightRow">
+        <button class="spotlight active" data-spotlight="for-you">Dành cho bạn</button>
+        <button class="spotlight" data-spotlight="top">Top bán chạy 2024</button>
+        <button class="spotlight" data-spotlight="segment">Gợi ý theo phân khúc</button>
+        <button class="spotlight" data-spotlight="rules">Luật kết hợp mạnh</button>
+      </div>
+
+      <main class="store-layout">
+        <aside class="left-sidebar card-shell">
+          <div class="sidebar-header">
+            <h3>Danh sách product</h3>
+            <p>Chọn nhanh sản phẩm hoặc nhóm sản phẩm.</p>
+          </div>
+          <div id="sidebarFilters" class="sidebar-filter-group"></div>
+          <div id="sidebarProductList" class="sidebar-product-list"></div>
+        </aside>
+
+        <section class="center-content">
+          <div class="hero-card card-shell">
+            <div>
+              <div class="eyebrow">Xin chào, <span id="welcomeCustomerName">Khách hàng</span></div>
+              <h2 id="heroTitle">Gợi ý sản phẩm theo lịch sử mua và luật kết hợp</h2>
+              <p id="heroRecommendationText">
+                Hãy chọn một sản phẩm để xem chi tiết hoặc bấm “Mua ngay” để nhận gợi ý phù hợp với phân khúc hiện tại.
+              </p>
+            </div>
+            <div class="hero-tags">
+              <span id="heroSegmentTag" class="segment-badge">Segment</span>
+              <span class="mini-stat" id="heroProductCount">0 sản phẩm đã mua</span>
+            </div>
+          </div>
+
+          <section class="promo-carousel card-shell" id="promoCarousel">
+            <div class="carousel-stage" id="promoTrack"></div>
+            <button id="prevSlideBtn" class="carousel-arrow carousel-prev" type="button" aria-label="Slide trước">‹</button>
+            <button id="nextSlideBtn" class="carousel-arrow carousel-next" type="button" aria-label="Slide sau">›</button>
+            <div id="promoDots" class="carousel-dots"></div>
+          </section>
+
+          <section id="productListSection">
+            <div class="section-title-row">
+              <h3 id="productSectionTitle">Sản phẩm nổi bật</h3>
+              <div id="productCounter" class="soft-note"></div>
+            </div>
+            <div id="productGrid" class="product-grid"></div>
+          </section>
+
+          <section id="productDetailSection" class="product-detail hidden"></section>
+        </section>
+
+        <aside class="right-sidebar">
+          <div class="card-shell profile-card">
+            <div class="profile-top">
+              <div class="avatar-circle" id="avatarCircle">KH</div>
+              <div>
+                <div class="profile-label">Khách hàng đăng nhập</div>
+                <div class="profile-name" id="profileCustomerName">Khách hàng</div>
+                <div id="profileSegment" class="segment-badge">Segment</div>
+              </div>
+            </div>
+            <div class="profile-meta">
+              <div class="meta-line">
+                <span>Phân khúc hành vi</span>
+                <strong id="profileSegmentText">-</strong>
+              </div>
+              <div class="meta-line">
+                <span>Customer category</span>
+                <strong id="profileCategoryText">-</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-shell purchase-card">
+            <div class="card-title-row">
+              <h3>Đã từng mua</h3>
+              <span class="soft-note">Theo Customer_Name</span>
+            </div>
+            <div id="purchasedProducts" class="purchase-list"></div>
+          </div>
+
+          <div class="card-shell cart-preview-card">
+            <div class="card-title-row">
+              <h3>Giỏ hàng</h3>
+              <span id="cartSummary" class="soft-note">0 sản phẩm</span>
+            </div>
+            <div id="cartItems" class="cart-items"></div>
+          </div>
+        </aside>
+      </main>
+    </section>
+  </div>
+
+  <div id="recommendationModal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-panel">
+      <button id="closeRecommendationModal" class="modal-close" type="button">×</button>
+      <div class="modal-header">
+        <div class="eyebrow">Đề xuất theo luật kết hợp</div>
+        <h3 id="modalTitle">Gợi ý sản phẩm</h3>
+        <p id="modalSubtitle"></p>
+      </div>
+      <div id="recommendationList" class="recommendation-list"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
