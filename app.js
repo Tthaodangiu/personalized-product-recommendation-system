@@ -10,6 +10,7 @@ const DEFAULT_CONFIG = {
   },
   bannerSlides: []
 };
+
 const CATEGORY_ORDER = [
   'all',
   'Thực phẩm',
@@ -124,10 +125,9 @@ function bindStaticEvents() {
   dom.spotlightButtons.forEach(button => {
     button.addEventListener('click', () => {
       state.activeSpotlight = button.dataset.spotlight;
-      dom.spotlightButtons.forEach(btn =>
-        btn.classList.toggle('active', btn === button)
-      );
-  
+      dom.spotlightButtons.forEach(btn => btn.classList.toggle('active', btn === button));
+      state.activeSlide = dom.spotlightButtons.findIndex(btn => btn.dataset.spotlight === state.activeSpotlight);
+      updateCarouselPosition();
       renderHeroText();
       renderProductGrid();
     });
@@ -137,7 +137,7 @@ function bindStaticEvents() {
   dom.promoDots.addEventListener('click', event => {
     const button = event.target.closest('[data-slide-index]');
     if (!button) return;
-    setActiveSlide(Number(button.dataset.slideIndex), false);
+    setActiveSlide(Number(button.dataset.slideIndex), true);
   });
   dom.closeRecommendationModal.addEventListener('click', closeModal);
   document.querySelector('#recommendationModal .modal-backdrop').addEventListener('click', closeModal);
@@ -924,27 +924,23 @@ function buildSlides() {
   ];
 }
 
-function function setActiveSlide(index, syncSpotlight) { {
+function changeSlide(delta) {
   const slides = buildSlides();
   const nextIndex = (state.activeSlide + delta + slides.length) % slides.length;
-  setActiveSlide(nextIndex, false);
+  setActiveSlide(nextIndex, true);
 }
 
-function setActiveSlide(index, syncSpotlight = false) {
+function setActiveSlide(index, syncSpotlight) {
   const slides = buildSlides();
   state.activeSlide = ((index % slides.length) + slides.length) % slides.length;
   updateCarouselPosition();
-
   if (syncSpotlight) {
     const keys = ['for-you', 'top', 'segment', 'rules'];
     state.activeSpotlight = keys[state.activeSlide] || 'for-you';
-    dom.spotlightButtons.forEach(button =>
-      button.classList.toggle('active', button.dataset.spotlight === state.activeSpotlight)
-    );
+    dom.spotlightButtons.forEach(button => button.classList.toggle('active', button.dataset.spotlight === state.activeSpotlight));
     renderHeroText();
     renderProductGrid();
   }
-
   startCarouselTimer();
 }
 
