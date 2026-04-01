@@ -3,14 +3,13 @@ const DEFAULT_CONFIG = {
   rfmCsv: './RFM_moi.csv',
   imagesJson: './images.json',
   ruleFiles: {
-    'About to Sleep': './About_to_sleep_rules.xlsx',
-    'Champion': './Champion_Rules.xlsx',
-    'Hibernating': './Hibernating_Rules.xlsx',
-    'Loyal': './Loyal_Rules.xlsx'
+    'About to Sleep': './fixed_file_About_to_Sleep.xlsx',
+    'Champion': './fixed_file_Champion_Rules.xlsx',
+    'Hibernating': './fixed_file_Hibernating_Rules.xlsx',
+    'Loyal': './fixed_file_Loyal_Rules.xlsx'
   },
   bannerSlides: []
 };
-
 const CATEGORY_ORDER = [
   'all',
   'Thực phẩm',
