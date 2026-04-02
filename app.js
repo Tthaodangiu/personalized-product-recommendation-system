@@ -203,11 +203,13 @@ async function loadAllData(showToast = false) {
     ]);
 
     buildStoreData(transactions, rfm, images, rulesBySegment);
+
     renderSampleNames();
     renderSidebarFilters();
     renderSidebarProducts();
     renderUtilityPills();
     applyLoginSceneBackground();
+
     dom.loadingView.classList.add('hidden');
     dom.loginView.classList.remove('hidden');
 
