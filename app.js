@@ -288,7 +288,6 @@ function normalizeRule(row) {
     segment: segmentKey(row.Segment || row.segment || '')
   };
 }
-
 function buildStoreData(transactions, rfmRows, images, rulesBySegment) {
   state.images = images;
   state.rulesBySegment = rulesBySegment;
@@ -314,6 +313,7 @@ function buildStoreData(transactions, rfmRows, images, rulesBySegment) {
 
   const customerMap = new Map();
   const productCount = new Map();
+
   transactions.forEach(row => {
     const key = normalizeText(row.Customer_Name);
     if (!key) return;
@@ -352,15 +352,19 @@ function buildStoreData(transactions, rfmRows, images, rulesBySegment) {
     });
   });
 
-  state.customers = Object.fromEntries(Array.from(customerMap.entries()).map(([key, customer]) => [key, customer]));
+  state.customers = Object.fromEntries(
+    Array.from(customerMap.entries()).map(([key, customer]) => [key, customer])
+  );
   state.samples = Array.from(customerMap.values()).slice(0, 16).map(customer => customer.name);
 
-  state.products = Array.from(productCount.entries()).map(([name, pop]) => ({
-    name,
-    popularity: pop,
-    category: classifyProductCategory(name),
-    description: ''
-  })).sort((a, b) => b.popularity - a.popularity || a.name.localeCompare(b.name, 'vi'));
+  state.products = Array.from(productCount.entries())
+    .map(([name, pop]) => ({
+      name,
+      popularity: pop,
+      category: classifyProductCategory(name),
+      description: ''
+    }))
+    .sort((a, b) => b.popularity - a.popularity || a.name.localeCompare(b.name, 'vi'));
 
   state.products = state.products.map(product => ({
     ...product,
