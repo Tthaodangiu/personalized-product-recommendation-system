@@ -68,12 +68,33 @@ function cacheDom() {
     'heroSegmentTag','heroProductCount','sidebarFilters','sidebarProductList','productGrid','productCounter','productSectionTitle',
     'productDetailSection','profileCustomerName','profileSegment','profileSegmentText','profileCategoryText','avatarCircle',
     'purchasedProducts','cartItems','cartSummary','promoTrack','promoDots','prevSlideBtn','nextSlideBtn',
-    'recommendationModal','closeRecommendationModal','modalTitle','modalSubtitle','recommendationList','toast'
+    'recommendationModal','closeRecommendationModal','modalTitle','modalSubtitle','recommendationList','toast','productDetailModal','productDetailModalContent',
   ].forEach(id => dom[id] = document.getElementById(id));
   dom.spotlightButtons = Array.from(document.querySelectorAll('.spotlight'));
+  dom.closeProductDetailModal = document.getElementById('closeProductDetailModal');
 }
 
 function bindStaticEvents() {
+  dom.productDetailModalContent.addEventListener('click', event => {
+  const button = event.target.closest('[data-detail-modal-action]');
+  if (!button) return;
+
+  const action = button.dataset.detailModalAction;
+  const productName = button.dataset.productName;
+  if (!productName) return;
+
+  if (action === 'add') {
+    addToCart(productName);
+    return;
+  }
+
+  if (action === 'buy') {
+    closeProductDetailModal();
+    showRecommendations(productName);
+  }
+});
+  dom.closeProductDetailModal.addEventListener('click', closeProductDetailModal);
+  document.querySelector('#productDetailModal .modal-backdrop').addEventListener('click', closeProductDetailModal);
   dom.loginBtn.addEventListener('click', () => loginByName(dom.customerNameInput.value));
   dom.customerNameInput.addEventListener('keydown', event => {
     if (event.key === 'Enter') loginByName(dom.customerNameInput.value);
@@ -509,8 +530,12 @@ function openStore() {
   renderProductGrid();
   renderPurchasedProducts();
   renderCart();
-  dom.productDetailSection.classList.add('hidden');
-  dom.productDetailSection.innerHTML = '';
+  dom.productDetailSection.classList.remove('hidden');
+  dom.productDetailSection.innerHTML = `
+    <div class="empty-state">
+      Chọn một sản phẩm để xem chi tiết tại đây.
+    </div>
+  `;
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -720,28 +745,69 @@ function renderProductCard(product) {
 function showProductDetail(product) {
   state.selectedProduct = product.name;
   const image = resolveProductImage(product.name, product.category, 'large');
-  dom.productDetailSection.innerHTML = `
-    <div class="detail-layout">
-      <div class="detail-media"><img src="${escapeHtml(image)}" alt="${escapeHtml(product.name)}" /></div>
-      <div>
-        <div class="detail-top">
-          <h3 class="detail-title">${escapeHtml(product.name)}</h3>
+  const customer = state.currentCustomer;
+  const purchasedQty = customer?.purchases?.[product.name] || 0;
+
+  dom.productDetailModalContent.innerHTML = `
+    <div class="detail-modal-layout">
+      <div class="detail-modal-media">
+        <img src="${escapeHtml(image)}" alt="${escapeHtml(product.name)}" />
+      </div>
+
+      <div class="detail-modal-content">
+        <div class="detail-modal-top">
+          <h3 class="detail-modal-title">${escapeHtml(product.name)}</h3>
           <span class="product-category-pill">${escapeHtml(product.category)}</span>
         </div>
-        <p class="detail-copy">${escapeHtml(product.description)}</p>
-        <p class="detail-copy">Sản phẩm này xuất hiện ${product.popularity.toLocaleString('vi-VN')} lần trong data_2024.csv. Bạn có thể thêm vào giỏ hàng hoặc bấm “Mua ngay” để xem đề xuất theo luật kết hợp đúng với phân khúc hiện tại.</p>
-        <div class="detail-actions">
-          <button class="add-btn" type="button" data-action="add" data-product-name="${escapeHtml(product.name)}">Thêm vào giỏ hàng</button>
-          <button class="buy-btn" type="button" data-action="buy" data-product-name="${escapeHtml(product.name)}">Mua ngay</button>
+
+        <p class="detail-modal-copy">
+          ${escapeHtml(product.description)}
+        </p>
+
+        <p class="detail-modal-copy">
+          Sản phẩm này xuất hiện ${product.popularity.toLocaleString('vi-VN')} lần trong data_2024.csv.
+          Bạn có thể thêm vào giỏ hàng hoặc bấm “Mua ngay” để xem đề xuất theo luật kết hợp đúng với phân khúc hiện tại.
+        </p>
+
+        <div class="detail-modal-statline">
+          <strong>${product.popularity.toLocaleString('vi-VN')}</strong> lượt xuất hiện
         </div>
-        <button class="back-link" type="button" data-action="back">← Quay lại danh sách sản phẩm</button>
+        <div class="detail-modal-statline">
+          <strong>${escapeHtml(product.category)}</strong> nhóm sản phẩm
+        </div>
+        <div class="detail-modal-statline">
+          <strong>${purchasedQty}</strong> đã mua
+        </div>
+
+        <div class="detail-modal-actions">
+          <button class="add-btn" type="button" data-detail-modal-action="add" data-product-name="${escapeHtml(product.name)}">
+            Thêm vào giỏ hàng
+          </button>
+          <button class="buy-btn" type="button" data-detail-modal-action="buy" data-product-name="${escapeHtml(product.name)}">
+            Mua ngay
+          </button>
+        </div>
+
+        <div class="detail-modal-back">← Quay lại danh sách sản phẩm</div>
       </div>
     </div>
   `;
-  dom.productDetailSection.classList.remove('hidden');
-  const container = dom.productGrid.parentElement;
-  container.insertBefore(dom.productDetailSection, dom.productGrid);
+
+  dom.productDetailModal.classList.remove('hidden');
 }
+function closeProductDetailModal() {
+  dom.productDetailModal.classList.add('hidden');
+}
+  const rect = dom.productDetailSection.getBoundingClientRect();
+  const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
+
+  if (!isVisible) {
+    dom.productDetailSection.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  }
+
 
 function handleProductAction(event) {
   const button = event.target.closest('[data-action]');
@@ -761,7 +827,11 @@ function handleDetailAction(event) {
   const action = button.dataset.action;
   const productName = button.dataset.productName;
   if (action === 'back') {
-    dom.productDetailSection.classList.add('hidden');
+    dom.productDetailSection.innerHTML = `
+      <div class="empty-state">
+        Chọn một sản phẩm để xem chi tiết tại đây.
+      </div>
+    `;
     return;
   }
   if (action === 'add') addToCart(productName);
