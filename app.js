@@ -49,15 +49,21 @@ async function init() {
   bindStaticEvents();
   fillConfigInputs();
 
-  const sessionConfig = loadSavedConfig();
-  if (sessionConfig) {
-    state.config = mergeConfig(DEFAULT_CONFIG, sessionConfig);
-    fillConfigInputs();
+async function loadRulesSafely() {
+  const result = {};
+
+  for (const [segment, path] of Object.entries(state.config.ruleFiles)) {
+    try {
+      const rows = path ? await parseExcel(path) : [];
+      result[segment] = rows.map(normalizeRule).filter(Boolean);
+    } catch (error) {
+      console.error(`Lỗi load rules cho segment ${segment}:`, error);
+      result[segment] = [];
+    }
   }
 
-  await loadAllData();
+  return result;
 }
-
 function cacheDom() {
   [
     'loadingView','loadingText','loginView','storeView','customerNameInput','loginBtn','loginMessage','sampleNames',
@@ -222,7 +228,7 @@ async function loadAllData(showToast = false) {
       loadImages(state.config.imagesJson),
       loadRules()
     ]);
-
+    const [transactions, rfm, images, rulesBySegment] 
     buildStoreData(transactions, rfm, images, rulesBySegment);
     renderSampleNames();
     renderSidebarFilters();
