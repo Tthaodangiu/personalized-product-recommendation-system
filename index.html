@@ -9,15 +9,15 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script>
     window.STORE_FILE_CONFIG = {
-      transactionsCsv: './data_2024.csv',
-      rfmCsv: './RFM_moi.csv',
-      imagesJson: './images.json',
-      ruleFiles: {
-        'About to Sleep': './fixed_file_About_to_Sleep.xlsx',
-        'Champion': './fixed_file_Champion_Rules copy.xlsx',
-        'Hibernating': './fixed_file_Hibernating_Rules.xlsx',
-        'Loyal': './fixed_file_Loyal_Rules.xlsx'
-      },
+    transactionsCsv: './data_2024.csv',
+    rfmCsv: './RFM_moi.csv',
+    imagesJson: './images.json',
+    ruleFiles: {
+      'About to Sleep': './fixed_file_About_to_Sleep.xlsx',
+      'Champion': './fixed_file_Champion_Rules.xlsx',
+      'Hibernating': './fixed_file_Hibernating_Rules.xlsx',
+      'Loyal': './fixed_file_Loyal_Rules.xlsx'
+    },
       bannerSlides: [
         {
           title: 'Ưu tiên theo lịch sử mua của bạn',
@@ -51,13 +51,6 @@
     };
   </script>
 </head>
-<div id="productDetailModal" class="modal hidden">
-  <div class="modal-backdrop"></div>
-  <div class="modal-panel product-detail-modal-panel">
-    <button id="closeProductDetailModal" class="modal-close" type="button">×</button>
-    <div id="productDetailModalContent"></div>
-  </div>
-</div>
 <body>
   <div id="app">
     <section id="loadingView" class="view loading-view">
@@ -112,7 +105,7 @@
             <div class="eyebrow">Demo cửa hàng</div>
             <h1>Vui lòng nhập tên khách hàng</h1>
             <p class="login-subtitle">
-              Không cần mật khẩu. Hệ thống sẽ dò theo <strong>Tên khách hàng</strong>, sau đó hiển thị
+              Không cần mật khẩu. Hệ thống sẽ dò theo <strong>Customer_Name</strong>, sau đó hiển thị
               phân khúc và lịch sử mua của khách hàng đó.
             </p>
 
@@ -151,7 +144,7 @@
 
             <label class="terms-line">
               <input type="checkbox" checked />
-              <span>Tôi hiểu đây là phiên bản đăng nhập theo tên khách hàng, không dùng password.</span>
+              <span>Tôi hiểu đây là bản demo đăng nhập theo tên khách hàng, không dùng password.</span>
             </label>
           </div>
         </div>
@@ -229,7 +222,7 @@
             <button id="nextSlideBtn" class="carousel-arrow carousel-next" type="button" aria-label="Slide sau">›</button>
             <div id="promoDots" class="carousel-dots"></div>
           </section>
-          <section id="productDetailSection" class="product-detail hidden"></section>
+
           <section id="productListSection">
             <div class="section-title-row">
               <h3 id="productSectionTitle">Sản phẩm nổi bật</h3>
@@ -237,6 +230,8 @@
             </div>
             <div id="productGrid" class="product-grid"></div>
           </section>
+
+          <section id="productDetailSection" class="product-detail hidden"></section>
         </section>
 
         <aside class="right-sidebar">
@@ -264,7 +259,7 @@
           <div class="card-shell purchase-card">
             <div class="card-title-row">
               <h3>Đã từng mua</h3>
-              <span class="soft-note">Theo Tên khách hàng</span>
+              <span class="soft-note">Theo Customer_Name</span>
             </div>
             <div id="purchasedProducts" class="purchase-list"></div>
           </div>
